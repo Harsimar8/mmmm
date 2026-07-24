@@ -1,0 +1,20 @@
+:host {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.map-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+app-leaflet-map {
+    flex: 1;
+}
+
+app-cesium-map {
+    flex: 1;
+}

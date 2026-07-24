@@ -1,0 +1,17 @@
+<div class="asset-browser">
+
+  <h3>Asset Browser</h3>
+
+  <div class="tree">
+
+    <app-tree-node
+      *ngFor="let node of tree()"
+      [node]="node"
+      (assetSelected)="selectAsset($event)">
+    </app-tree-node>
+
+  </div>
+
+  <app-property-panel></app-property-panel>
+
+</div>

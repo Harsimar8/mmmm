@@ -1,0 +1,71 @@
+:host {
+
+  display: block;
+
+  width: 100%;
+
+  height: 100%;
+
+}
+
+.cesium-container {
+
+  width: 100%;
+
+  height: 100%;
+
+}
+
+.entity-tooltip {
+
+    position: absolute;
+
+    background: rgba(30,30,30,0.95);
+
+    color: white;
+
+    padding: 6px 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    pointer-events: none;
+
+    white-space: nowrap;
+
+    z-index: 1000;
+
+}
+
+.cesium-filter {
+
+  position: absolute;
+
+  top: 20px;
+  left: 20px;
+
+  z-index: 1000;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+}
+
+
+.cesium-filter button {
+
+  padding: 8px 15px;
+
+  cursor: pointer;
+
+  background: white;
+
+  border: 1px solid #777;
+
+  border-radius: 5px;
+
+}

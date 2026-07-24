@@ -1,0 +1,103 @@
+<div class="property-panel">
+
+  <div
+  class="placement-banner"
+  *ngIf="editorState.placementMode()"
+>
+
+  <div>
+
+    <strong>📍 Placement Mode</strong>
+
+    <br>
+
+    {{ editorState.selectedAsset()?.name }}
+
+  </div>
+
+  <button (click)="exitPlacementMode()">
+    ✕
+</button>
+
+</div>
+
+  <!-- ENTITY -->
+  <ng-container *ngIf="editorState.selectedEntity() as entity; else assetTemplate">
+
+    <div class="header">
+
+      <h3>Entity Properties</h3>
+
+    <button (click)="clearSelection()">
+    ✕
+</button>
+
+    </div>
+
+    <hr>
+
+    <p><strong>Name:</strong> {{ entity.definition.name }}</p>
+
+    <p><strong>Team:</strong> {{ entity.team }}</p>
+
+    <p><strong>Latitude:</strong> {{ entity.position.latitude }}</p>
+
+    <p><strong>Longitude:</strong> {{ entity.position.longitude }}</p>
+
+    <p><strong>Altitude:</strong> {{ entity.position.altitude }}</p>
+
+    <hr>
+
+    <h4>Properties</h4>
+
+    <div *ngFor="let item of entity.definition.properties | keyvalue">
+
+      <strong>{{ item.key }}</strong> : {{ item.value }}
+
+    </div>
+    <button class="delete-btn" (click)="deleteEntity()">
+  Delete Entity
+</button>
+
+  </ng-container>
+
+  <!-- ASSET -->
+  <ng-template #assetTemplate>
+
+    <div *ngIf="editorState.selectedAsset() as asset">
+
+      <div class="header">
+
+        <h3>Asset Properties</h3>
+
+        <button (click)="exitPlacementMode()">
+    ✕
+</button>
+
+      </div>
+
+      <hr>
+
+      <p><strong>Name:</strong> {{ asset.name }}</p>
+
+      <p><strong>Category:</strong> {{ asset.category }}</p>
+
+      <p><strong>Entity Type:</strong> {{ asset.entityType }}</p>
+
+      <p><strong>Role:</strong> {{ asset.role }}</p>
+
+      <hr>
+
+      <h4>Properties</h4>
+
+      <div *ngFor="let item of asset.properties | keyvalue">
+
+        <strong>{{ item.key }}</strong> : {{ item.value }}
+
+      </div>
+
+    </div>
+
+  </ng-template>
+
+</div>

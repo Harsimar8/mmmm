@@ -1,0 +1,37 @@
+<div class="map-wrapper">
+
+    <div class="team-filter">
+
+    <button
+        class="all"
+        [class.active]="teamFilterService.leafletFilter() === TeamFilter.All"
+        (click)="setAllForces()">
+
+        👥
+
+    </button>
+
+    <button
+        class="blue"
+        [class.active]="teamFilterService.leafletFilter() === TeamFilter.Blue"
+        (click)="setBlueForces()">
+
+        🔵
+
+    </button>
+
+    <button
+        class="red"
+        [class.active]="teamFilterService.leafletFilter() === TeamFilter.Red"
+        (click)="setRedForces()">
+
+        🔴
+
+    </button>
+
+</div>
+
+    <div #mapContainer class="map">
+    </div>
+
+</div>

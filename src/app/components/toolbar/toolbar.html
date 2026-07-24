@@ -1,0 +1,108 @@
+<div class="toolbar">
+
+    <button>
+        Select
+    </button>
+
+    <input
+        #fileInput
+        type="file"
+        accept=".json"
+        hidden
+        (change)="onFileSelected($event)">
+
+        <input
+    #scenarioInput
+    type="file"
+    accept=".json"
+    hidden
+    (change)="loadScenario($event)">
+    <button (click)="fileInput.click()">
+        Upload JSON
+    </button>
+
+    <button (click)="removeJson()">
+        Remove JSON
+    </button>
+
+    <span class="spacer"></span>
+
+    <div class="filter-container">
+
+    <button (click)="toggleFilters()">
+        Filters ▼
+    </button>
+
+    <div
+        class="filter-dropdown"
+        *ngIf="showFilters()"
+    >
+
+        <div
+            class="filter-item"
+           *ngFor="let type of assetLibraryService.entityTypes()"
+        >
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    [checked]="filterService.isEnabled(type)"
+                    (change)="toggleType(type)"
+                >
+
+                {{ type }}
+
+            </label>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="force-tabs">
+
+    <button
+        class="force-btn"
+        [class.active]="editorState.selectedTeam() === Team.Blue"
+        (click)="setBlueTeam()">
+
+        🔵 Blue
+
+    </button>
+
+    <button
+        class="force-btn"
+        [class.active]="editorState.selectedTeam() === Team.Red"
+        (click)="setRedTeam()">
+
+        🔴 Red
+
+    </button>
+
+</div>
+    <button (click)="saveScenario()">
+    Save Scenario
+</button>
+    <button (click)="clearScenario()">
+    Clear
+</button>
+
+    <button (click)="scenarioInput.click()">
+    Load Scenario
+</button>
+
+   <button (click)="showSplit()">
+    Split
+</button>
+
+<button (click)="show2D()">
+    Full 2D
+</button>
+
+<button (click)="show3D()">
+    Full 3D
+</button>
+
+</div>

@@ -1,0 +1,105 @@
+@import "leaflet/dist/leaflet.css";
+p
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+app-root {
+    display: block;
+    height: 100%;
+}
+
+/* .selected-marker img {
+
+    filter:
+        drop-shadow(0 0 3px rgba(255,220,90,.9))
+        drop-shadow(0 0 8px rgba(255,220,90,.7))
+        drop-shadow(0 0 14px rgba(255,220,90,.45));
+
+    transform: scale(1.08);
+
+    transition: all .2s ease;
+
+} */
+
+
+ .selected-marker {
+
+
+
+    opacity: 0.35 !important;
+
+
+
+    border: 4px solid red !important;
+
+
+
+    border-radius: 50%;
+
+
+
+    background: lime !important;
+ }
+
+ /* ==========================================================
+   Permanent Entity Label
+   ========================================================== */
+
+.leaflet-tooltip.entity-label {
+
+    background: rgba(255, 255, 255, 0.96) !important;
+
+    color: #111111 !important;
+
+    border: 1px solid #cfcfcf !important;
+
+    border-radius: 4px !important;
+
+    padding: 2px 6px !important;
+
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18) !important;
+
+    font-size: 11px !important;
+
+    font-weight: 600 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    line-height: 1.2 !important;
+
+}
+
+.leaflet-tooltip.entity-label::before {
+
+    display: none !important;
+
+}
+
+.leaflet-tooltip.entity-label .team-dot {
+
+    display: inline-block;
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    margin-right: 5px;
+
+    vertical-align: middle;
+
+}

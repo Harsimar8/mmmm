@@ -1,0 +1,17 @@
+<div class="map-container">
+
+    <app-leaflet-map
+        *ngIf="
+            editorState.viewMode() === ViewMode.Split ||
+            editorState.viewMode() === ViewMode.TwoD
+        ">
+    </app-leaflet-map>
+
+    <app-cesium-map
+        *ngIf="
+            editorState.viewMode() === ViewMode.Split ||
+            editorState.viewMode() === ViewMode.ThreeD
+        ">
+    </app-cesium-map>
+
+</div>
