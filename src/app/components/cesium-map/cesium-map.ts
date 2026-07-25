@@ -33,11 +33,12 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
 
     effect(() => {
 
-     
+     const state = this.mapSync.state(); 
 
       if (!this.viewer) return;
 
-      const state = this.mapSync.state();
+
+      console.log("CESIUM received:", state);
       if (state.source === 'cesium') {
         return;
       }
@@ -127,24 +128,100 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
         terrain: Cesium.Terrain.fromWorldTerrain()
       }
     );
+// const buildings = await Cesium.createOsmBuildingsAsync({
 
-     const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(
-    5087488
-);
+//     style: new Cesium.Cesium3DTileStyle({
 
-// this.viewer.scene.primitives.add(tileset);
-//     this.viewer.camera.setView({
-//   destination: Cesium.Cartesian3.fromDegrees(
-//     77.2090,   // Longitude
-//     28.6139,   // Latitude
-//     5000       // Height (meters)
-//   ),
-//   orientation: {
-//     heading: 0,
-//     pitch: Cesium.Math.toRadians(-45),
-//     roll: 0
+//         color: {
+//             conditions: [
+
+//                 ["${feature['building']} === 'hospital'", "color('#d9d9d9')"],
+
+//                 ["${feature['building']} === 'school'", "color('#d6c8a3')"],
+
+//                 ["${feature['building']} === 'industrial'", "color('#c0c0c0')"],
+
+//                 ["true", "color('#f2f2f2')"]
+
+//             ]
+//         }
+
+
+        
+//     })
+
+// });
+
+// this.viewer.scene.globe.enableLighting = true;
+
+// this.viewer.shadows = true;
+
+// this.viewer.shadowMap.enabled = true;
+// if (this.viewer.scene.skyAtmosphere) {
+//     this.viewer.scene.skyAtmosphere.show = true;
+// }
+// this.viewer.scene.globe.depthTestAgainstTerrain = true;
+
+// this.viewer.scene.primitives.add(buildings);
+
+// const buildingDataSource = await Cesium.GeoJsonDataSource.load(
+//   'assets/data/buildings.geojson',
+//   {
+//     clampToGround: true
+//   }
+// );
+
+// this.viewer.dataSources.add(buildingDataSource);
+
+// buildingDataSource.entities.values.forEach(entity => {
+//   if (entity.polygon) {
+//     entity.polygon.material = new Cesium.ColorMaterialProperty(
+//       Cesium.Color.LIGHTGRAY.withAlpha(0.7)
+//     );
+
+//     entity.polygon.outline = new Cesium.ConstantProperty(true);
+
+//     entity.polygon.outlineColor = new Cesium.ConstantProperty(
+//       Cesium.Color.BLACK
+//     );
 //   }
 // });
+
+// const roadDataSource = await Cesium.GeoJsonDataSource.load(
+//   'assets/data/roads.geojson',
+//   {
+//     clampToGround: true
+//   }
+// );
+
+
+// roadDataSource.entities.values.forEach(entity => {
+//   if (entity.polyline) {
+//     entity.polyline.material = new Cesium.ColorMaterialProperty(
+//       Cesium.Color.YELLOW
+//     );
+
+//     entity.polyline.width = new Cesium.ConstantProperty(2);
+//   }
+// });
+// this.viewer.dataSources.add(roadDataSource);
+
+this.viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(
+    75.7873,   // Jaipur longitude
+    26.9124,   // Jaipur latitude
+    1200       // Height in meters (adjust as needed)
+  ),
+  orientation: {
+    heading: Cesium.Math.toRadians(0),
+    pitch: Cesium.Math.toRadians(-45),
+    roll: 0
+  }
+});
+// await this.viewer.zoomTo(buildingDataSource);
+
+
+
 
 this.renderer = new CesiumEntityRenderer(
     this.viewer,
