@@ -33,17 +33,18 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
 
     effect(() => {
 
-     const state = this.mapSync.state(); 
+      const state = this.mapSync.state();
 
       if (!this.viewer) return;
 
 
-      console.log("CESIUM received:", state);
+
       if (state.source === 'cesium') {
         return;
       }
 
       const current = this.viewer.camera.positionCartographic;
+
 
       const lat = Cesium.Math.toDegrees(current.latitude);
       const lon = Cesium.Math.toDegrees(current.longitude);
@@ -83,20 +84,22 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
     });
 
 
-   effect(() => {
+    effect(() => {
 
-    const entities = this.entityRepository.all();
+      const entities = this.entityRepository.all();
 
-    // Make this effect rerun when selection changes
-    this.editorState.selectedEntity();
+      // Make this effect rerun when selection changes
+      this.editorState.selectedEntity();
+      const filter = this.teamFilterService.cesiumFilter();
 
-    if (this.renderer) {
+      if (this.renderer) {
 
         this.renderer.render(entities);
 
-    }
 
-});
+      }
+
+    });
 
   }
 
@@ -110,268 +113,498 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
   private placement!: CesiumPlacement;
   private hover!: CesiumHover;
   private selection!: CesiumSelection;
-  
+  protected readonly TeamFilter = TeamFilter;
+
   private readonly entityRepository = inject(EntityRepository);
   private readonly editorState = inject(EditorState);
- 
+
   private animationFrame?: number;
 
   private syncing = false;
   private syncTimeout?: ReturnType<typeof setTimeout>;
   private cesiumSyncFrame: number | null = null;
 
- async ngAfterViewInit(): Promise<void> {
+  async ngAfterViewInit(): Promise<void> {
 
     this.viewer = new Cesium.Viewer(
+
+
       this.cesiumContainer.nativeElement,
       {
-        terrain: Cesium.Terrain.fromWorldTerrain()
+
+        terrain: Cesium.Terrain.fromWorldTerrain(),
+
+        animation: false,
+        timeline: false,
+        baseLayerPicker: false,
+        geocoder: false,
+        homeButton: true,
+        sceneModePicker: true,
+        navigationHelpButton: true,
+        fullscreenButton: true,
+        infoBox: false,
+        selectionIndicator: false,
+
+        requestRenderMode: true,
+        maximumRenderTimeChange: Infinity,
+
+
+        terrainShadows: Cesium.ShadowMode.DISABLED,
       }
     );
-// const buildings = await Cesium.createOsmBuildingsAsync({
-
-//     style: new Cesium.Cesium3DTileStyle({
-
-//         color: {
-//             conditions: [
-
-//                 ["${feature['building']} === 'hospital'", "color('#d9d9d9')"],
-
-//                 ["${feature['building']} === 'school'", "color('#d6c8a3')"],
-
-//                 ["${feature['building']} === 'industrial'", "color('#c0c0c0')"],
-
-//                 ["true", "color('#f2f2f2')"]
-
-//             ]
-//         }
 
 
-        
-//     })
-
-// });
-
-// this.viewer.scene.globe.enableLighting = true;
-
-// this.viewer.shadows = true;
-
-// this.viewer.shadowMap.enabled = true;
-// if (this.viewer.scene.skyAtmosphere) {
-//     this.viewer.scene.skyAtmosphere.show = true;
-// }
-// this.viewer.scene.globe.depthTestAgainstTerrain = true;
-
-// this.viewer.scene.primitives.add(buildings);
-
-// const buildingDataSource = await Cesium.GeoJsonDataSource.load(
-//   'assets/data/buildings.geojson',
-//   {
-//     clampToGround: true
-//   }
-// );
-
-// this.viewer.dataSources.add(buildingDataSource);
-
-// buildingDataSource.entities.values.forEach(entity => {
-//   if (entity.polygon) {
-//     entity.polygon.material = new Cesium.ColorMaterialProperty(
-//       Cesium.Color.LIGHTGRAY.withAlpha(0.7)
-//     );
-
-//     entity.polygon.outline = new Cesium.ConstantProperty(true);
-
-//     entity.polygon.outlineColor = new Cesium.ConstantProperty(
-//       Cesium.Color.BLACK
-//     );
-//   }
-// });
-
-// const roadDataSource = await Cesium.GeoJsonDataSource.load(
-//   'assets/data/roads.geojson',
-//   {
-//     clampToGround: true
-//   }
-// );
-
-
-// roadDataSource.entities.values.forEach(entity => {
-//   if (entity.polyline) {
-//     entity.polyline.material = new Cesium.ColorMaterialProperty(
-//       Cesium.Color.YELLOW
-//     );
-
-//     entity.polyline.width = new Cesium.ConstantProperty(2);
-//   }
-// });
-// this.viewer.dataSources.add(roadDataSource);
-
-this.viewer.camera.setView({
-  destination: Cesium.Cartesian3.fromDegrees(
-    75.7873,   // Jaipur longitude
-    26.9124,   // Jaipur latitude
-    1200       // Height in meters (adjust as needed)
-  ),
-  orientation: {
-    heading: Cesium.Math.toRadians(0),
-    pitch: Cesium.Math.toRadians(-45),
-    roll: 0
-  }
-});
-// await this.viewer.zoomTo(buildingDataSource);
+    this.viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(
+        78.9629,   // Longitude
+        20.5937,   // Latitude
+        2500000    // Height (about zoom level 5)
+      )
+    });
+    console.log(
+      this.viewer.scene.screenSpaceCameraController.enableZoom
+    );
+    this.viewer.scene.screenSpaceCameraController.enableZoom = true;
+    this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+    this.viewer.scene.screenSpaceCameraController.enableTilt = true;
+    this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
+    this.viewer.scene.screenSpaceCameraController.enableLook = true;
 
 
 
+    this.viewer.scene.fog.enabled = false;
 
-this.renderer = new CesiumEntityRenderer(
-    this.viewer,
+    this.viewer.scene.globe.enableLighting = true;
+
+    this.viewer.scene.light = new Cesium.SunLight({
+      intensity: 1.6
+    });
+
+    this.viewer.scene.globe.depthTestAgainstTerrain = false;
+    const buildings = await Cesium.createOsmBuildingsAsync({
+
+      style: new Cesium.Cesium3DTileStyle({
+
+        color: {
+
+          conditions: [
+
+            [
+              "${feature['building']} === 'hospital'",
+              "color('#F6C8C8',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'school'",
+              "color('#F2E8B5',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'industrial'",
+              "color('#B8B8B8',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'commercial'",
+              "color('#D8D0C4',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'retail'",
+              "color('#E8DCCB',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'office'",
+              "color('#DCE3E8',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'apartments'",
+              "color('#F0E6D9',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'house'",
+              "color('#EEDBC8',0.95)"
+            ],
+
+            [
+              "${feature['building']} === 'garage'",
+              "color('#BDBDBD',0.95)"
+            ],
+
+            [
+              "true",
+              "color('#ECE7DF',0.95)"
+            ]
+
+          ]
+
+        }
+
+      })
+
+    });
+
+    this.viewer.shadows = true;
+
+    buildings.shadows = Cesium.ShadowMode.ENABLED;
+    buildings.maximumScreenSpaceError = 64;
+
+    buildings.dynamicScreenSpaceError = true;
+
+    buildings.dynamicScreenSpaceErrorDensity = 0.0025;
+
+    buildings.dynamicScreenSpaceErrorFactor = 10.0;
+
+    buildings.dynamicScreenSpaceErrorHeightFalloff = 0.25;
+
+    buildings.skipLevelOfDetail = true;
+
+    buildings.preloadWhenHidden = false;
+
+    buildings.preloadFlightDestinations = false;
+
+
+
+    this.viewer.scene.primitives.add(buildings);
     
-    this.teamFilterService,
-    this.editorState
-);
-    this.placement = new CesiumPlacement(
+    this.viewer.scene.globe.maximumScreenSpaceError = 8;
 
-    this.viewer,
+    this.viewer.resolutionScale = 1.0;
 
-    this.editorState,
+    this.viewer.scene.msaaSamples = 1;
+    this.viewer.scene.globe.enableLighting = true;
 
-    this.entityRepository
 
-);
 
-this.selection = new CesiumSelection(
+    const roadDataSource = await Cesium.GeoJsonDataSource.load(
+      'assets/data/roads.geojson',
+      {
+        clampToGround: true
+      }
+    );
 
-    this.viewer,
 
-    this.editorState,
+    roadDataSource.entities.values.forEach(entity => {
 
-    this.entityRepository
+    if (!entity.polyline) return;
 
-);
+    const highway =
+        entity.properties?.['highway']?.getValue();
 
-this.hover = new CesiumHover(
-    this.viewer
-);
+    // Hide tiny roads for better performance
+    if (
+        highway === "service" ||
+        highway === "track" ||
+        highway === "path" ||
+        highway === "footway" ||
+        highway === "cycleway"
+    ) {
+        entity.show = false;
+        return;
+    }
+
+    let width = 2;
+    let color = Cesium.Color.LIGHTGRAY;
+
+    switch (highway) {
+
+        case "motorway":
+            width = 8;
+            color = Cesium.Color.ORANGE;
+            break;
+
+        case "trunk":
+            width = 7;
+            color = Cesium.Color.GOLD;
+            break;
+
+        case "primary":
+            width = 6;
+            color = Cesium.Color.GOLDENROD;
+            break;
+
+        case "secondary":
+            width = 5;
+            color = Cesium.Color.WHITE;
+            break;
+
+        case "tertiary":
+            width = 4;
+            color = Cesium.Color.SILVER;
+            break;
+
+        case "residential":
+            width = 2;
+            color = Cesium.Color.LIGHTGRAY;
+            break;
+    }
+
+    entity.polyline.width =
+        new Cesium.ConstantProperty(width);
+
+    entity.polyline.material =
+        new Cesium.ColorMaterialProperty(color);
+
+});
+    this.viewer.dataSources.add(roadDataSource);
+
+
+    const vegetationDataSource = await Cesium.GeoJsonDataSource.load(
+      'assets/data/vegetation.geojson',
+      {
+        clampToGround: true
+      }
+    );
+
+    vegetationDataSource.entities.values.forEach(entity => {
+
+      if (!entity.polygon) return;
+
+      const landuse =
+        entity.properties?.['landuse']?.getValue()
+
+      const natural =
+        entity.properties?.['natural']?.getValue()
+
+      const leisure =
+        entity.properties?.['leisure']?.getValue()
+
+      let color =
+        Cesium.Color.GREEN.withAlpha(0.45);
+
+      if (natural === "wood") {
+
+        color =
+          Cesium.Color.DARKGREEN.withAlpha(0.60);
+
+      }
+
+      else if (natural === "scrub") {
+
+        color =
+          Cesium.Color.OLIVEDRAB.withAlpha(0.50);
+
+      }
+
+      else if (landuse === "forest") {
+
+        color =
+          Cesium.Color.FORESTGREEN.withAlpha(0.55);
+
+      }
+
+      else if (landuse === "grass") {
+
+        color =
+          Cesium.Color.LAWNGREEN.withAlpha(0.35);
+
+      }
+
+      else if (landuse === "meadow") {
+
+        color =
+          Cesium.Color.YELLOWGREEN.withAlpha(0.35);
+
+      }
+
+      else if (leisure === "park") {
+
+        color =
+          Cesium.Color.GREEN.withAlpha(0.30);
+
+      }
+
+      else if (leisure === "garden") {
+
+        color =
+          Cesium.Color.SEAGREEN.withAlpha(0.35);
+
+      }
+
+      entity.polygon.material =
+        new Cesium.ColorMaterialProperty(color);
+
+      entity.polygon.outline =
+        new Cesium.ConstantProperty(false);
+
+    });
+
+    this.viewer.dataSources.add(vegetationDataSource);
+
+    // await this.viewer.zoomTo(buildingDataSource);
+
+
+
+
+    this.renderer = new CesiumEntityRenderer(
+      this.viewer,
+
+      this.teamFilterService,
+      this.editorState
+    );
+
 
     this.renderer.render(this.entityRepository.all());
 
+    
+    this.placement = new CesiumPlacement(
+
+      this.viewer,
+
+      this.editorState,
+
+      this.entityRepository
+
+    );
+
+    this.selection = new CesiumSelection(
+
+      this.viewer,
+
+      this.editorState,
+
+      this.entityRepository
+
+    );
+
+    // this.hover = new CesiumHover(
+    //     this.viewer
+    // );
+
+
+
+    //     const handler = new Cesium.ScreenSpaceEventHandler(
+    //       this.viewer.scene.canvas
+    //     );
 
     const handler = new Cesium.ScreenSpaceEventHandler(
       this.viewer.scene.canvas
     );
 
     handler.setInputAction(
-
       this.handleLeftClick.bind(this),
-
       Cesium.ScreenSpaceEventType.LEFT_CLICK
-
     );
-    handler.setInputAction(
+    //     handler.setInputAction(
 
-    this.hover.handleMouseMove.bind(this.hover),
+    //       this.handleLeftClick.bind(this),
 
-    Cesium.ScreenSpaceEventType.MOUSE_MOVE
+    //       Cesium.ScreenSpaceEventType.LEFT_CLICK
 
-);
+    //     );
+    //     handler.setInputAction(
+
+    //     this.hover.handleMouseMove.bind(this.hover),
+
+    //     Cesium.ScreenSpaceEventType.MOUSE_MOVE
+
+    // );
 
 
 
-   this.viewer.camera.moveStart.addEventListener(() => {
+    this.viewer.camera.moveStart.addEventListener(() => {
 
-    this.startCesiumCameraLoop();
+      this.startCesiumCameraLoop();
 
-});
+    });
 
-this.viewer.camera.moveEnd.addEventListener(() => {
+    this.viewer.camera.moveEnd.addEventListener(() => {
 
-    this.stopCesiumCameraLoop();
+      this.stopCesiumCameraLoop();
 
-});
+    });
+
+    // this.viewer.camera.changed.addEventListener(() => {
+    //   this.viewer.scene.requestRender();
+    // });
+    this.viewer.scene.requestRender();
   }
 
   private startCesiumCameraLoop(): void {
 
     if (this.cesiumSyncFrame !== null) {
-        return;
+      return;
     }
 
     const tick = () => {
 
-        if (!this.viewer || this.syncing) {
+      if (!this.viewer || this.syncing) {
 
-            this.cesiumSyncFrame = null;
-            return;
+        this.cesiumSyncFrame = null;
+        return;
 
-        }
+      }
 
-        const camera = this.viewer.camera.positionCartographic;
+      const camera = this.viewer.camera.positionCartographic;
 
-        const latitude = Cesium.Math.toDegrees(camera.latitude);
-        const longitude = Cesium.Math.toDegrees(camera.longitude);
+      const latitude = Cesium.Math.toDegrees(camera.latitude);
+      const longitude = Cesium.Math.toDegrees(camera.longitude);
 
-        this.mapSync.update({
+      this.mapSync.update({
 
-            latitude,
-            longitude,
+        latitude,
+        longitude,
 
-            zoom: this.mapSync.heightToLeafletZoom(
-                camera.height,
-                latitude,
-                this.viewer.scene.canvas.clientHeight
-            ),
+        zoom: this.mapSync.heightToLeafletZoom(
+          camera.height,
+          latitude,
+          this.viewer.scene.canvas.clientHeight
+        ),
 
-            source: 'cesium'
+        source: 'cesium'
 
-        });
+      });
 
-        this.cesiumSyncFrame = requestAnimationFrame(tick);
+      this.cesiumSyncFrame = requestAnimationFrame(tick);
 
     };
 
     this.cesiumSyncFrame = requestAnimationFrame(tick);
 
-}
+  }
 
 
-private stopCesiumCameraLoop(): void {
+  private stopCesiumCameraLoop(): void {
 
     if (this.cesiumSyncFrame !== null) {
 
-        cancelAnimationFrame(this.cesiumSyncFrame);
+      cancelAnimationFrame(this.cesiumSyncFrame);
 
-        this.cesiumSyncFrame = null;
+      this.cesiumSyncFrame = null;
 
     }
 
-}
+  }
 
-setAllForces(){
+  setAllForces() {
 
-  this.teamFilterService.setCesiumFilter(
+    this.teamFilterService.setCesiumFilter(
       TeamFilter.All
-  );
+    );
 
-}
+  }
 
 
-setBlueForces(){
+  setBlueForces() {
 
-  this.teamFilterService.setCesiumFilter(
+    this.teamFilterService.setCesiumFilter(
       TeamFilter.Blue
-  );
+    );
 
-}
+  }
 
 
-setRedForces(){
+  setRedForces() {
 
-  this.teamFilterService.setCesiumFilter(
+    this.teamFilterService.setCesiumFilter(
       TeamFilter.Red
-  );
+    );
 
-}
- 
+  }
+
   private handleLeftClick(
     click: Cesium.ScreenSpaceEventHandler.PositionedEvent
   ): void {
@@ -392,7 +625,7 @@ setRedForces(){
 
     this.viewer.resize();
 
-}
+  }
 
   ngOnDestroy(): void {
 

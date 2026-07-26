@@ -1,22 +1,39 @@
-<!-- <div #cesiumContainer class="cesium-container"></div> -->
+<div class="map-wrapper">
 
+    <div class="team-filter">
 
+        <button
+            class="all"
+            [class.active]="teamFilterService.cesiumFilter() === TeamFilter.All"
+            (click)="setAllForces()">
 
-<div class="cesium-filter">
+            👥
 
-<button (click)="setAllForces()">
-  All
-</button>
+        </button>
 
-<button (click)="setBlueForces()">
-  Blue
-</button>
+        <button
+            class="blue"
+            [class.active]="teamFilterService.cesiumFilter() === TeamFilter.Blue"
+            (click)="setBlueForces()">
 
-<button (click)="setRedForces()">
-  Red
-</button>
+            🔵
+
+        </button>
+
+        <button
+            class="red"
+            [class.active]="teamFilterService.cesiumFilter() === TeamFilter.Red"
+            (click)="setRedForces()">
+
+            🔴
+
+        </button>
+
+    </div>
+
+    <div
+        #cesiumContainer
+        class="map">
+    </div>
 
 </div>
-
-
-<div #cesiumContainer class="cesium-container"></div>

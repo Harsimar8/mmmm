@@ -10,6 +10,7 @@ import { TeamFilter } from '../../core/models/TeamFilter';
 
 export class CesiumEntityRenderer {
 
+    private readonly renderedEntities = new Set<string>();
     constructor(
         private viewer: Cesium.Viewer,
          private teamFilterService: TeamFilterService,
@@ -17,26 +18,21 @@ export class CesiumEntityRenderer {
     ) { }
 
     render(entities: Entity[]): void {
+        
+
+
+        const filter = this.teamFilterService.cesiumFilter();
 
         this.viewer.entities.removeAll();
-
+this.renderedEntities.clear();
         for (const entity of entities) {
+          
 
-            const filter = this.teamFilterService.cesiumFilter();
-
-
-if(
-filter === TeamFilter.Blue &&
-entity.team !== Team.Blue
-){
-    continue;
-}
-
-
-if(
-filter === TeamFilter.Red &&
-entity.team !== Team.Red
-){
+        
+         if (
+    (filter === TeamFilter.Blue && entity.team !== Team.Blue) ||
+    (filter === TeamFilter.Red && entity.team !== Team.Red)
+) {
     continue;
 }
             const selected =

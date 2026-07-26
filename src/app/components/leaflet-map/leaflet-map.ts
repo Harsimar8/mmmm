@@ -38,7 +38,7 @@ export class LeafletMap implements AfterViewInit, OnDestroy {
 
     effect(() => {
 
-      console.log("Leaflet effect", this.mapSync.state());
+      
       if (!this.map) return;
 
       const state = this.mapSync.state();
