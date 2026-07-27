@@ -153,7 +153,7 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
         maximumRenderTimeChange: Infinity,
 
 
-        terrainShadows: Cesium.ShadowMode.DISABLED,
+        terrainShadows: Cesium.ShadowMode.RECEIVE_ONLY,
       }
     );
 
@@ -185,7 +185,7 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
     });
 
     this.viewer.scene.globe.depthTestAgainstTerrain = false;
-    await BuildingLayer.load(this.viewer);
+   
 
     await RoadLayer.load(this.viewer);
 
@@ -193,6 +193,8 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
     this.viewer,
     this.isPointInPolygon.bind(this)
 );
+
+
     // await this.viewer.zoomTo(buildingDataSource);
 
 
