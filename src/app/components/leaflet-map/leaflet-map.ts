@@ -36,12 +36,16 @@ export class LeafletMap implements AfterViewInit, OnDestroy {
     private entityRepository: EntityRepository
   ) {
 
+    console.log("Leaflet constructor");
     effect(() => {
-
+       console.log("Leaflet effect running");
       
-      if (!this.map) return;
-
       const state = this.mapSync.state();
+
+console.log("State:", state);
+
+if (!this.map) return;
+      console.log("LEAFLET RECEIVED", state);
       if (state.source === 'leaflet') {
         return;
       }

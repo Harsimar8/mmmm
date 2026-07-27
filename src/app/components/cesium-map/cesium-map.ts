@@ -543,20 +543,26 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
       const latitude = Cesium.Math.toDegrees(camera.latitude);
       const longitude = Cesium.Math.toDegrees(camera.longitude);
 
-      this.mapSync.update({
+      const zoom = this.mapSync.heightToLeafletZoom(
+    camera.height,
+    latitude,
+    this.viewer.scene.canvas.clientHeight
+);
 
-        latitude,
-        longitude,
+console.log("CESIUM SYNC", {
+    latitude,
+    longitude,
+    zoom
+});
 
-        zoom: this.mapSync.heightToLeafletZoom(
-          camera.height,
-          latitude,
-          this.viewer.scene.canvas.clientHeight
-        ),
+this.mapSync.update({
 
-        source: 'cesium'
+    latitude,
+    longitude,
+    zoom,
+    source: 'cesium'
 
-      });
+});
 
       this.cesiumSyncFrame = requestAnimationFrame(tick);
 
