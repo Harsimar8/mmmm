@@ -18,6 +18,10 @@ import { EditorState } from '../../core/state/EditorState';
 import { TeamFilterService } from '../../core/services/TeamFilterService';
 import { MapSyncService } from '../../core/services/MapSync';
 import { CesiumSelection } from "./CesiumSelection";
+import { BuildingLayer } from './layers/BuildingLayer';
+import { VegetationLayer } from './layers/VegetationLayer';
+import { RoadLayer } from './layers/RoadLayer';
+
 
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxNzFhZjQzZC0xNGNmLTQyNDAtOTFlMC1jMmEyMDQwOTExNDAiLCJpZCI6NDQyMjYxLCJzdWIiOiJIYXJzaW1hcjA4IiwiaXNzIjoiaHR0cHM6Ly9hcGkuY2VzaXVtLmNvbSIsImF1ZCI6Im1pc3Npb24iLCJpYXQiOjE3ODQwMDU4MjB9.NzxkVB0Hlz8uYySEa5PaSg7bycWumdeeUXiaJgk57XY';
 @Component({
@@ -181,259 +185,14 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
     });
 
     this.viewer.scene.globe.depthTestAgainstTerrain = false;
-    const buildings = await Cesium.createOsmBuildingsAsync({
+    await BuildingLayer.load(this.viewer);
 
-      style: new Cesium.Cesium3DTileStyle({
+    await RoadLayer.load(this.viewer);
 
-        color: {
-
-          conditions: [
-
-            [
-              "${feature['building']} === 'hospital'",
-              "color('#F6C8C8',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'school'",
-              "color('#F2E8B5',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'industrial'",
-              "color('#B8B8B8',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'commercial'",
-              "color('#D8D0C4',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'retail'",
-              "color('#E8DCCB',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'office'",
-              "color('#DCE3E8',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'apartments'",
-              "color('#F0E6D9',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'house'",
-              "color('#EEDBC8',0.95)"
-            ],
-
-            [
-              "${feature['building']} === 'garage'",
-              "color('#BDBDBD',0.95)"
-            ],
-
-            [
-              "true",
-              "color('#ECE7DF',0.95)"
-            ]
-
-          ]
-
-        }
-
-      })
-
-    });
-
-    this.viewer.shadows = true;
-
-    buildings.shadows = Cesium.ShadowMode.ENABLED;
-    buildings.maximumScreenSpaceError = 64;
-
-    buildings.dynamicScreenSpaceError = true;
-
-    buildings.dynamicScreenSpaceErrorDensity = 0.0025;
-
-    buildings.dynamicScreenSpaceErrorFactor = 10.0;
-
-    buildings.dynamicScreenSpaceErrorHeightFalloff = 0.25;
-
-    buildings.skipLevelOfDetail = true;
-
-    buildings.preloadWhenHidden = false;
-
-    buildings.preloadFlightDestinations = false;
-
-
-
-    this.viewer.scene.primitives.add(buildings);
-    
-    this.viewer.scene.globe.maximumScreenSpaceError = 8;
-
-    this.viewer.resolutionScale = 1.0;
-
-    this.viewer.scene.msaaSamples = 1;
-    this.viewer.scene.globe.enableLighting = true;
-
-
-
-    const roadDataSource = await Cesium.GeoJsonDataSource.load(
-      'assets/data/roads.geojson',
-      {
-        clampToGround: true
-      }
-    );
-
-
-    roadDataSource.entities.values.forEach(entity => {
-
-    if (!entity.polyline) return;
-
-    const highway =
-        entity.properties?.['highway']?.getValue();
-
-    // Hide tiny roads for better performance
-    if (
-        highway === "service" ||
-        highway === "track" ||
-        highway === "path" ||
-        highway === "footway" ||
-        highway === "cycleway"
-    ) {
-        entity.show = false;
-        return;
-    }
-
-    let width = 2;
-    let color = Cesium.Color.LIGHTGRAY;
-
-    switch (highway) {
-
-        case "motorway":
-            width = 8;
-            color = Cesium.Color.ORANGE;
-            break;
-
-        case "trunk":
-            width = 7;
-            color = Cesium.Color.GOLD;
-            break;
-
-        case "primary":
-            width = 6;
-            color = Cesium.Color.GOLDENROD;
-            break;
-
-        case "secondary":
-            width = 5;
-            color = Cesium.Color.WHITE;
-            break;
-
-        case "tertiary":
-            width = 4;
-            color = Cesium.Color.SILVER;
-            break;
-
-        case "residential":
-            width = 2;
-            color = Cesium.Color.LIGHTGRAY;
-            break;
-    }
-
-    entity.polyline.width =
-        new Cesium.ConstantProperty(width);
-
-    entity.polyline.material =
-        new Cesium.ColorMaterialProperty(color);
-
-});
-    this.viewer.dataSources.add(roadDataSource);
-
-
-    const vegetationDataSource = await Cesium.GeoJsonDataSource.load(
-      'assets/data/vegetation.geojson',
-      {
-        clampToGround: true
-      }
-    );
-
-    vegetationDataSource.entities.values.forEach(entity => {
-
-      if (!entity.polygon) return;
-
-      const landuse =
-        entity.properties?.['landuse']?.getValue()
-
-      const natural =
-        entity.properties?.['natural']?.getValue()
-
-      const leisure =
-        entity.properties?.['leisure']?.getValue()
-
-      let color =
-        Cesium.Color.GREEN.withAlpha(0.45);
-
-      if (natural === "wood") {
-
-        color =
-          Cesium.Color.DARKGREEN.withAlpha(0.60);
-
-      }
-
-      else if (natural === "scrub") {
-
-        color =
-          Cesium.Color.OLIVEDRAB.withAlpha(0.50);
-
-      }
-
-      else if (landuse === "forest") {
-
-        color =
-          Cesium.Color.FORESTGREEN.withAlpha(0.55);
-
-      }
-
-      else if (landuse === "grass") {
-
-        color =
-          Cesium.Color.LAWNGREEN.withAlpha(0.35);
-
-      }
-
-      else if (landuse === "meadow") {
-
-        color =
-          Cesium.Color.YELLOWGREEN.withAlpha(0.35);
-
-      }
-
-      else if (leisure === "park") {
-
-        color =
-          Cesium.Color.GREEN.withAlpha(0.30);
-
-      }
-
-      else if (leisure === "garden") {
-
-        color =
-          Cesium.Color.SEAGREEN.withAlpha(0.35);
-
-      }
-
-      entity.polygon.material =
-        new Cesium.ColorMaterialProperty(color);
-
-      entity.polygon.outline =
-        new Cesium.ConstantProperty(false);
-
-    });
-
-    this.viewer.dataSources.add(vegetationDataSource);
-
+    await VegetationLayer.load(
+    this.viewer,
+    this.isPointInPolygon.bind(this)
+);
     // await this.viewer.zoomTo(buildingDataSource);
 
 
@@ -449,7 +208,7 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
 
     this.renderer.render(this.entityRepository.all());
 
-    
+
     this.placement = new CesiumPlacement(
 
       this.viewer,
@@ -544,25 +303,25 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
       const longitude = Cesium.Math.toDegrees(camera.longitude);
 
       const zoom = this.mapSync.heightToLeafletZoom(
-    camera.height,
-    latitude,
-    this.viewer.scene.canvas.clientHeight
-);
+        camera.height,
+        latitude,
+        this.viewer.scene.canvas.clientHeight
+      );
 
-console.log("CESIUM SYNC", {
-    latitude,
-    longitude,
-    zoom
-});
+      console.log("CESIUM SYNC", {
+        latitude,
+        longitude,
+        zoom
+      });
 
-this.mapSync.update({
+      this.mapSync.update({
 
-    latitude,
-    longitude,
-    zoom,
-    source: 'cesium'
+        latitude,
+        longitude,
+        zoom,
+        source: 'cesium'
 
-});
+      });
 
       this.cesiumSyncFrame = requestAnimationFrame(tick);
 
@@ -610,6 +369,43 @@ this.mapSync.update({
     );
 
   }
+  private isPointInPolygon(
+    point: Cesium.Cartographic,
+    polygon: Cesium.Cartographic[]
+): boolean {
+
+    let inside = false;
+
+    for (
+        let i = 0, j = polygon.length - 1;
+        i < polygon.length;
+        j = i++
+    ) {
+
+        const xi = Cesium.Math.toDegrees(polygon[i].longitude);
+        const yi = Cesium.Math.toDegrees(polygon[i].latitude);
+
+        const xj = Cesium.Math.toDegrees(polygon[j].longitude);
+        const yj = Cesium.Math.toDegrees(polygon[j].latitude);
+
+        const x = Cesium.Math.toDegrees(point.longitude);
+        const y = Cesium.Math.toDegrees(point.latitude);
+
+        const intersect =
+            ((yi > y) !== (yj > y)) &&
+            (x <
+                (xj - xi) *
+                    (y - yi) /
+                    (yj - yi) +
+                    xi);
+
+        if (intersect) {
+            inside = !inside;
+        }
+    }
+
+    return inside;
+}
 
   private handleLeftClick(
     click: Cesium.ScreenSpaceEventHandler.PositionedEvent
