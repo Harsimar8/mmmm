@@ -195,6 +195,8 @@ export class CesiumMap implements AfterViewInit, OnDestroy {
 );
 
 
+await BuildingLayer.load(this.viewer);
+
     // await this.viewer.zoomTo(buildingDataSource);
 
 
